@@ -1,0 +1,276 @@
+#define DEBUG true
+// colocar pines
+#define PIN_BUZZER
+#define PIN_PULSADOR
+#define BUZZER //PONER PIN 
+#define PULSADOR //PONER PIN
+#define P_MOTOR_R_IZQ //PONER PIN
+#define P_MOTOR_L_IZQ //PONER PIN
+#define P_MOTOR_R_DER//PONER PIN
+#define P_MOTOR_L_DER //PONER PIN
+#define P_ULTRA_DER_TRIGGER //PONER PIN
+#define P_ULTRA_DER_ECHO //PONER PIN
+#define P_ULTRA_IZQ_TRIGGER //PONER PIN
+#define P_ULTRA_IZQ_ECHO //PONER PIN
+#define DISTANCIA_MAX 50 //distancia max que queres que detecte 
+int VELOCIDAD_DE_GIRO = 130;
+int VELOCIDAD_RECONOCER = 130;
+#define MINIMO_PISO //PONE EL VALOR DEL BLANCO Y SUMALE 7
+//EJ SI EL PISO BLANCO VALE 70 ACA PONE 77
+#define CNYDER//PONER PIN
+#define CNYIZQ //PONER PIN
+int VELOCIDAD_ATAQUE = 160; // regular
+int VELOCIDAD_SEGUIMIENTO = 145;
+
+int distanciaDer;
+int distanciaIzq;
+int pisoDer;
+int pisoIzq;
+unsigned long tiempo;
+int periodo;
+bool ultraLogicDer = false;
+bool ultraLogicIzq = false;
+
+class Cny70
+{
+private:
+    int _pin, _receptor;
+
+public:
+    Cny70(int pin)
+    {
+        _pin = pin;
+    }
+
+    int GetValor()
+    {
+        return map(analogRead(_pin),0,4095,0,1000); ;
+    }
+};
+class Motores
+{
+private:
+    int _p_r_izq, _p_l_izq, _p_r_der, _p_l_der;
+
+public:
+    Motores(int pr_izq, int pl_izq, int pr_der, int pl_der)
+    {
+        _p_r_izq = pr_izq;
+        _p_l_izq = pl_izq;
+        _p_r_der = pr_der;
+        _p_l_der = pl_der;
+
+        pinMode(_p_r_izq, OUTPUT);
+        pinMode(_p_l_izq, OUTPUT);
+        pinMode(_p_r_der, OUTPUT);
+        pinMode(_p_l_der, OUTPUT);
+    }
+    void avanzar(int velocidad)
+    {
+        digitalWrite(_p_r_izq, LOW);
+        analogWrite(_p_l_izq, velocidad);
+
+        digitalWrite(_p_r_der, LOW);
+        analogWrite(_p_l_der, velocidad);
+    }
+    void retroceder(int velocidad)
+    {
+        digitalWrite(_p_l_izq, LOW);
+        analogWrite(_p_r_izq, velocidad);
+
+        digitalWrite(_p_l_der, LOW);
+        analogWrite(_p_r_der, velocidad);
+    }
+    void frenar()
+    {
+        digitalWrite(_p_r_izq, LOW);
+        digitalWrite(_p_l_izq, LOW);
+
+        digitalWrite(_p_r_der, LOW);
+        digitalWrite(_p_l_der, LOW);
+    }
+    void giro_izquierda(int velocidad)
+    {
+        digitalWrite(_p_l_izq, LOW);
+        analogWrite(_p_r_izq, velocidad);
+
+        digitalWrite(_p_r_der, LOW);
+        analogWrite(_p_l_der, velocidad);
+    }
+    void giro_derecha(int velocidad)
+    {
+        digitalWrite(_p_r_izq, LOW);
+        analogWrite(_p_l_izq, velocidad);
+
+        digitalWrite(_p_l_der, LOW);
+        analogWrite(_p_r_der, velocidad);
+    }
+};
+
+class Buzzer
+{
+private:
+    int pin;
+
+public:
+    Buzzer(int pin)
+    {
+        this->pin = pin;
+        pinMode(pin, OUTPUT);
+    }
+    void Encender()
+    {
+        digitalWrite(pin, HIGH);
+    }
+    void Apagar()
+    {
+        digitalWrite(pin, LOW);
+    }
+};
+
+class Pulsador
+{
+private:
+    int pin;
+
+public:
+    Pulsador(int pin)
+    {
+        this->pin = pin;
+        pinMode(pin, INPUT);
+    }
+
+    bool getEstado()
+    {
+        bool estado = digitalRead(pin);
+        return estado;
+    }
+};
+
+class UltraSonido
+{
+private:
+    int _trigger;
+    int _echo;
+    int _distancia;
+    unsigned long _tiempo;
+
+public:
+    UltraSonido(int trigger, int echo)
+    {
+        _trigger = trigger;
+        _echo = echo;
+        pinMode(_trigger, OUTPUT);
+        pinMode(_echo, INPUT);
+        digitalWrite(_trigger, LOW);
+    }
+    int GetDistancia()
+    {
+        digitalWrite(_trigger, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(_trigger, LOW);
+        _tiempo = pulseIn(_echo, HIGH);
+        _distancia = _tiempo / 59;
+        return _distancia;
+    }
+};
+
+Motores *motor = new Motores(P_MOTOR_R_IZQ, P_MOTOR_L_IZQ, P_MOTOR_R_DER, P_MOTOR_L_DER); // poner pines de los motores como estan en la libreria
+UltraSonido *ultraSDer = new UltraSonido(P_ULTRA_DER_TRIGGER, P_ULTRA_DER_ECHO);
+UltraSonido *ultraSIzq = new UltraSonido(P_ULTRA_IZQ_TRIGGER, P_ULTRA_IZQ_ECHO);
+Cny70 *cnyDer = new Cny70(CNYDER);
+Cny70 *cnyIzq = new Cny70(CNYIZQ);
+Buzzer *buzzer = new Buzzer(PIN_BUZZER);
+
+Pulsador *pulsador = new Pulsador(PIN_PULSADOR);
+
+
+
+
+void Inicio()
+{
+
+    while (esperandoPulsador)
+    {
+        bool inicio = pulsador->getEstado();
+        if (inicio)
+        {
+            buzzer->Encender();
+            delay(5000);
+            esperandoPulsador = false;
+            buzzer->Apagar();
+        }
+    }
+}
+
+// avanzamos solo si no estamos sobre la linea del borde en ese caso doblamos
+//  poner parametros en limite
+// la velocidad de reintegro es la velocidad de giro para volver a entrar en la pista
+void Adelante(int velocidadAdelante, int velocidadReintegro)
+{
+    bool giroIzquierda = (pisoDer > MINIMO_PISO);
+    bool giroDerecha = (pisoIzq > MINIMO_PISO);
+    bool atras = (giroDerecha && giroIzquierda);
+
+    if (atras){
+         motor->retroceder(velocidadReintegro);
+         delay(700);
+    }
+       
+    else if (giroDerecha)
+        motor->giro_derecha(velocidadReintegro);
+    else if (giroIzquierda)
+        motor->giro_izquierda(velocidadReintegro);
+    else
+        motor->avanzar(velocidadAdelante);
+}
+
+// giramos y en caso de no encontrar nada avanzamos
+void Reconocer()
+{
+    motor->giro_izquierda(VELOCIDAD_DE_GIRO); // meter velocidad de giro
+    if (millis() < tiempo + periodo)
+    {
+        tiempo = millis();
+        Adelante(VELOCIDAD_RECONOCER, VELOCIDAD_DE_GIRO);
+    }
+}
+
+void sensores()
+{
+    distanciaDer = ultraSDer->GetDistancia();
+    distanciaIzq = ultraSIzq->GetDistancia();
+    pisoDer = cnyDer->GetValor();
+    pisoIzq = cnyIzq->GetValor();
+    ultraLogicIzq = (distanciaDer < DISTANCIA_MAX);
+    ultraLogicDer = (distanciaIzq < DISTANCIA_MAX);
+}
+
+void Busquedad()
+{
+    bool atacar = (ultraLogicIzq && ultraLogicDer);
+    bool izquierda = (ultraLogicIzq);
+    bool derecha = (ultraLogicDer);
+
+    if (atacar)
+        Adelante(VELOCIDAD_ATAQUE, VELOCIDAD_DE_GIRO);
+    else if (izquierda)
+        motor->giro_izquierda(VELOCIDAD_SEGUIMIENTO);
+    else if (derecha)
+        motor->giro_derecha(VELOCIDAD_SEGUIMIENTO);
+    else
+        Reconocer();
+}
+
+
+
+void setup()
+{
+    Inicio();
+}
+
+void loop()
+{
+    sensores();
+    Busquedad();
+}
