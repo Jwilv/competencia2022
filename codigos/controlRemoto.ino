@@ -311,11 +311,11 @@ void setup()
 {
     
     CambiarMarchas();
+    PS4.attach(notify);
     PS4.attachOnConnect(onConnect);
     PS4.attachOnDisconnect(onDisConnect);
-    Inicio();
-    PS4.attach(notify);
     PS4.begin();
+    Inicio();
     
 }
 
