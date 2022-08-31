@@ -1,12 +1,16 @@
 
 /////////////////////////////     seguidor
+#define PULSADOR //PONER PIN
 
+#define BUZZER //PONER PIN
 
 #define PROMEDIO 2 
 
 #define DIFERENCIAL 20
 
 #define MARGEN 20
+
+bool esperandoPulsador = true;
 
 int velocidadSeguidor = 200; //si se pasa baja la velocidad 
 
@@ -72,6 +76,20 @@ int frecuencia = 5000;
 
 int resolucion = 8;
 /////////////////////////////////////////////
+class Pulsador{
+private:
+int pin;
+public:
+Pulsador(int pin){
+this->pin = pin;
+pinMode(pin,INPUT);
+}
+ bool getEstado()
+  {
+    bool estado = digitalRead(pin);
+    return estado;
+  }
+};
 
 /////////////////////////////////////////////////
 class MotoresPwm
@@ -163,6 +181,29 @@ public:
     }
 };
 ////////////////////////////////////////////////
+
+class Buzzer
+{
+private:
+    int pin;
+
+public:
+    Buzzer(int pin)
+    {
+         this->pin = pin;
+        pinMode(pin, OUTPUT);
+    }
+    void Encender()
+    {
+        digitalWrite(_pin, HIGH);
+    }
+    void Apagar()
+    {
+        digitalWrite(_pin, LOW);
+    }
+};
+
+/////////////////////////////////////
 class Cny70
 {
 private:
@@ -180,6 +221,28 @@ public:
     }
 };
 /////////////////////////////////////////////////////////////////
+class Pulsador{
+private:
+int pin;
+public:
+Pulsador(int pin){
+this->pin = pin;
+pinMode(pin,INPUT);
+}
+ bool getEstado()
+  {
+    bool estado = digitalRead(pin);
+    return estado;
+  }
+};
+/////////////////////////////////////////////////////////////////
+
+Pulsador *pulsador = new Pulsador(PULSADOR);
+
+Buzzer *buzzer = new Buzzer(BUZZER);
+
+////////////////////////////////////////////////////////
+
 Cny70 *cnyDer = new Cny70(CNYDER);
 Cny70 *cnyIzq = new Cny70(CNYIZQ);
 ///////////////////////////////////////////////
@@ -234,10 +297,27 @@ void seguidor(){
     Seguir();
 }
 
+void Inicio()
+{
+
+    while (esperandoPulsador)
+    {
+        bool inicio = pulsador->getEstado();
+        if (inicio)
+        {
+            buzzer->Encender();
+            delay(5000);
+            esperandoPulsador = false;
+            buzzer->Apagar();
+        }
+    }
+}
+
 
 
 void setup()
 {
+    Inicio();
 }
 void loop()
 {
