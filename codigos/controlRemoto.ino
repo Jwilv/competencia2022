@@ -294,7 +294,7 @@ void ControlRemoto()
     Controles();
 }
 void notify()
-{
+{    Inicio();
     ControlRemoto();
 }
 void onConnect()
@@ -315,7 +315,7 @@ void setup()
     PS4.attachOnConnect(onConnect);
     PS4.attachOnDisconnect(onDisConnect);
     PS4.begin();
-    Inicio();
+   
     
 }
 
