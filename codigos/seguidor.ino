@@ -1,8 +1,8 @@
 
 /////////////////////////////     seguidor
-#define PULSADOR //PONER PIN
+#define PIN_PULSADOR 1
 
-#define BUZZER //PONER PIN
+#define PIN_BUZZER 1
 
 #define PROMEDIO 2 
 
@@ -14,20 +14,20 @@ bool esperandoPulsador = true;
 
 int velocidadSeguidor = 200; //si se pasa baja la velocidad 
 
-#define CNYDER //poner pin
-#define CNYIZQ //poner pin
+#define CNYDER 1
+#define CNYIZQ 1 //poner pin
 
-#define P_MOTOR_R_IZQ //poner pin
-#define P_MOTOR_L_IZQ //poner pin
-#define P_MOTOR_R_DER //poner pin
-#define P_MOTOR_L_DER //poner pin
+#define P_MOTOR_R_IZQ 1 //poner pin
+#define P_MOTOR_L_IZQ 1 //poner pin
+#define P_MOTOR_R_DER 1 //poner pin
+#define P_MOTOR_L_DER 1 //poner pin
 
 
-#define P_ULTRA_DER_TRIGGER //poner pin
-#define P_ULTRA_DER_ECHO //poner pin
+#define P_ULTRA_DER_TRIGGER 1 //poner pin
+#define P_ULTRA_DER_ECHO 1 //poner pin
 
-#define P_ULTRA_IZQ_TRIGGER //poner pin
-#define P_ULTRA_IZQ_ECHO //poner pin
+#define P_ULTRA_IZQ_TRIGGER 1 //poner pin
+#define P_ULTRA_IZQ_ECHO 1 //poner pin
 
 #define DISTANCIA_MAX 30
 
@@ -47,7 +47,6 @@ int VELOCIDAD_SEGUIMIENTO = 145;
 bool giroIzquierda;
 bool giroDerecha;
 ///////////////////////////
-int  velocidadSeguidor = 230;
 
 
 int estadoActualDerecho;
@@ -195,11 +194,11 @@ public:
     }
     void Encender()
     {
-        digitalWrite(_pin, HIGH);
+        digitalWrite(pin, HIGH);
     }
     void Apagar()
     {
-        digitalWrite(_pin, LOW);
+        digitalWrite(pin, LOW);
     }
 };
 
@@ -221,11 +220,11 @@ public:
     }
 };
 /////////////////////////////////////////////////////////////////
-class Pulsador{
+class Pulsador1{
 private:
 int pin;
 public:
-Pulsador(int pin){
+Pulsador1(int pin){
 this->pin = pin;
 pinMode(pin,INPUT);
 }
@@ -237,9 +236,9 @@ pinMode(pin,INPUT);
 };
 /////////////////////////////////////////////////////////////////
 
-Pulsador *pulsador = new Pulsador(PULSADOR);
+Pulsador1 *pulsador = new Pulsador1(PIN_PULSADOR);
 
-Buzzer *buzzer = new Buzzer(BUZZER);
+Buzzer *buzzer = new Buzzer(PIN_BUZZER);
 
 ////////////////////////////////////////////////////////
 
