@@ -15,7 +15,7 @@ bool esperandoPulsador = true;
 int velocidadSeguidor = 200; //si se pasa baja la velocidad 
 
 #define CNYDER 1
-#define CNYIZQ 1 //poner pin
+#define CNYIZQ 39 //poner pin
 
 #define P_MOTOR_R_IZQ 1 //poner pin
 #define P_MOTOR_L_IZQ 1 //poner pin
@@ -320,8 +320,11 @@ void Inicio()
 void setup()
 {
     Inicio();
+    Serial.begin(9600);
 }
 void loop()
 {
-    seguidor();
+   // seguidor();
+   int cNyIzq = cnyIzq->GetValor();
+   Serial.println(cNyIzq);
 }
