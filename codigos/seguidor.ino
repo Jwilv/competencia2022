@@ -48,6 +48,8 @@ bool giroIzquierda;
 bool giroDerecha;
 ///////////////////////////
 
+bool seguir = false;
+
 
 int estadoActualDerecho;
 int estadoActualIzquierdo;
@@ -285,6 +287,7 @@ void BuscarPromedio(){
     if(promediar){
         promedioIdeal = PromedioIdeal();
         buscandoPromedio = false;
+        seguir = true;
     }
 }
 
@@ -293,7 +296,7 @@ void BuscarPromedio(){
 void seguidor(){
 
     if(buscandoPromedio)BuscarPromedio();
-    Seguir();
+    if(seguir)Seguir();
 }
 
 void Inicio()
