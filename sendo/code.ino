@@ -18,6 +18,12 @@ int VELOCIDAD_RECONOCER = 130;
 int VELOCIDAD_ATAQUE = 200;
 int VELOCIDAD_SEGUIMIENTO = 145;
 
+//////////////////////////////////
+bool giroIzquierda;
+bool giroDerecha ;
+bool atras;
+////////////////////////////
+
 int distanciaDer;
 int distanciaIzq;
 int pisoDer;
@@ -256,8 +262,24 @@ void Reconocimiento(){
   pisoIzq = cnyIzq->GetValor();
   ultraLogicIzq = (distanciaIzq < DISTANCIA_MAX);
   ultraLogicDer = (distanciaDer < DISTANCIA_MAX);
+//////////////////////////////////////////////////
+bool giroIzquierda = (pisoDer < MINIMO_PISO);
+bool giroDerecha = (pisoIzq < MINIMO_PISO);
+bool atras = (giroDerecha && giroIzquierda);
+//////////////////////////////////////////////////
+if(atras)
+else if(giroIzquierda)
+else if(giroDerecha)
 
   
-    
+
+////////////////////////////////////////////////////
+ if (ultraLogicIzq && ultraLogicDer) Adelante(VELOCIDAD_ATAQUE, VELOCIDAD_DE_GIRO);
+  else if (ultraLogicIzq)
+    motor->giro_izquierda(VELOCIDAD_SEGUIMIENTO);
+  else if (ultraLogicDer)
+    motor->giro_derecha(VELOCIDAD_SEGUIMIENTO);
+
+
   break;
 }
